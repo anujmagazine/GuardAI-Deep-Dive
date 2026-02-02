@@ -13,7 +13,10 @@ import {
   ShieldAlert,
   ChevronRight,
   Info,
-  Loader2
+  Loader2,
+  Settings,
+  ToggleLeft,
+  CircleCheck
 } from 'lucide-react';
 import { LicenseTier, DeepDiveResult, AnalysisInput } from './types';
 import { performDeepDive } from './services/geminiService';
@@ -46,7 +49,6 @@ const App: React.FC = () => {
     setError(null);
     setResult(null);
 
-    // Rotation of loading messages
     const msgInterval = setInterval(() => {
       setLoadingMsg(LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]);
     }, 3000);
@@ -335,6 +337,45 @@ const App: React.FC = () => {
                     <p className="text-sm text-slate-400">{risk.mitigation}</p>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Data Safety Settings (NEW SECTION) */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold flex items-center gap-2 text-white px-2">
+                <Settings className="w-6 h-6 text-blue-400" />
+                Data Safety & Privacy Controls
+              </h3>
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+                <div className="p-6 space-y-6">
+                  {!result.safetySettings.available ? (
+                    <div className="flex items-center gap-4 text-slate-500 py-4 italic">
+                      <ToggleLeft className="w-8 h-8 opacity-20" />
+                      None: This scenario or license tier lacks user-configurable privacy toggles.
+                    </div>
+                  ) : (
+                    <div className="grid gap-6">
+                      {result.safetySettings.configurations.map((config, cIdx) => (
+                        <div key={cIdx} className="space-y-3 bg-slate-950/50 border border-slate-800/50 rounded-xl p-5">
+                          <h4 className="flex items-center gap-2 font-bold text-blue-400">
+                            <CircleCheck className="w-4 h-4" />
+                            {config.title}
+                          </h4>
+                          <ol className="space-y-2">
+                            {config.steps.map((step, sIdx) => (
+                              <li key={sIdx} className="text-sm text-slate-300 flex gap-3">
+                                <span className="flex-shrink-0 w-5 h-5 bg-blue-600/20 text-blue-400 rounded-full flex items-center justify-center text-[10px] font-bold border border-blue-500/20">
+                                  {sIdx + 1}
+                                </span>
+                                {step}
+                              </li>
+                            ))}
+                          </ol>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

@@ -18,12 +18,21 @@ export interface SpecificRisk {
   severity: 'Low' | 'Medium' | 'High' | 'Critical';
 }
 
+export interface SafetySetting {
+  title: string;
+  steps: string[];
+}
+
 export interface DeepDiveResult {
   toolName: string;
   licenseTier: LicenseTier;
   scenario: string;
   dataFlowAnalysis: DataFlowStep[];
   specificRisks: SpecificRisk[];
+  safetySettings: {
+    available: boolean;
+    configurations: SafetySetting[];
+  };
   verdict: {
     summary: string;
     securityScore: number; // 0 to 100

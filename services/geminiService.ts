@@ -16,10 +16,12 @@ export async function performDeepDive(input: AnalysisInput): Promise<DeepDiveRes
     2. Focus on Tier: ${input.licenseTier}. Privacy terms often differ significantly between Free and Enterprise tiers.
     3. Analyze Scenario: ${input.scenario}. Map exactly how data moves, where it is stored, and who has access in this specific context.
     4. Search for specific clauses regarding feature training (AI training on user data), data retention, and sub-processors.
+    5. Proactive Safety: Identify any specific settings the user can toggle to improve safety for this scenario (e.g. "Opt-out of model training", "Delete data after session", "Enable E2EE"). Provide clear, numbered steps for each.
     
     JSON STRUCTURE REQUIREMENTS:
     - dataFlowAnalysis: Array of steps (step name, description, data types involved).
     - specificRisks: Array of risks unique to this tier + scenario combo.
+    - safetySettings: { available: boolean, configurations: [{ title: string, steps: string[] }] }.
     - verdict: Summary, securityScore (0-100), and a clear recommendation.
     - truthBomb: A brutally honest, creative, and "no-corporate-speak" warning about the hidden implications.
     
@@ -68,6 +70,24 @@ export async function performDeepDive(input: AnalysisInput): Promise<DeepDiveRes
               required: ["category", "risk", "mitigation", "severity"]
             }
           },
+          safetySettings: {
+            type: Type.OBJECT,
+            properties: {
+              available: { type: Type.BOOLEAN },
+              configurations: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    steps: { type: Type.ARRAY, items: { type: Type.STRING } }
+                  },
+                  required: ["title", "steps"]
+                }
+              }
+            },
+            required: ["available", "configurations"]
+          },
           verdict: {
             type: Type.OBJECT,
             properties: {
@@ -79,7 +99,7 @@ export async function performDeepDive(input: AnalysisInput): Promise<DeepDiveRes
           },
           truthBomb: { type: Type.STRING }
         },
-        required: ["dataFlowAnalysis", "specificRisks", "verdict", "truthBomb"]
+        required: ["dataFlowAnalysis", "specificRisks", "safetySettings", "verdict", "truthBomb"]
       },
       tools: [{ googleSearch: {} }]
     }
