@@ -1,0 +1,5 @@
+{
+  "name": "GuardAI: Deep Dive",
+  "description": "A specialized security analysis tool that investigates specific software scenarios and license tiers to determine precise data privacy implications using real-time search grounding.",
+  "requestFramePermissions": []
+}
