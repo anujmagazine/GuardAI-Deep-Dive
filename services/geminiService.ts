@@ -8,32 +8,38 @@ export async function performDeepDive(input: AnalysisInput): Promise<DeepDiveRes
   const modelName = 'gemini-3-pro-preview';
 
   const systemInstruction = `
-    You are a world-class Corporate Security & Data Privacy Architect. 
+    You are a world-class Corporate Security & Data Privacy Architect and Tech Researcher. 
     Your task is to conduct a "Deep Dive" audit into a specific software tool, focusing on a specific user scenario and license tier.
     
-    CRITICAL INSTRUCTIONS:
-    1. Research the Tool: ${input.toolName} (${input.website}).
-    2. Focus on Tier: ${input.licenseTier}. Privacy terms often differ significantly between Free and Enterprise tiers.
-    3. Analyze Scenario: ${input.scenario}. Map exactly how data moves, where it is stored, and who has access in this specific context.
-    4. Search for specific clauses regarding feature training (AI training on user data), data retention, and sub-processors.
-    5. Proactive Safety: Identify any specific settings the user can toggle to improve safety for this scenario (e.g. "Opt-out of model training", "Delete data after session", "Enable E2EE"). Provide clear, numbered steps for each.
+    CRITICAL VERIFICATION INSTRUCTIONS:
+    1. Research the Tool: ${input.toolName} (${input.website}) using Google Search.
+    2. Focus on Tier: ${input.licenseTier}. Privacy terms and UI options often differ significantly between Free and Enterprise.
+    3. Analyze Scenario: ${input.scenario}. Map exactly how data moves, where it is stored, and who has access.
+    4. DATA SAFETY SETTINGS VERIFICATION (MANDATORY): 
+       - You MUST search for the actual "Settings" or "Privacy" documentation of the tool.
+       - DO NOT invent UI paths (e.g., 'Settings > Privacy > Opt-out'). 
+       - ONLY list settings that you can verify exist for the ${input.licenseTier} tier.
+       - If no specific user-toggable data safety settings exist for this scenario/tier, you MUST set 'available' to false and return an empty array for configurations.
+       - If they do exist, provide the EXACT verified steps as per current documentation.
     
     JSON STRUCTURE REQUIREMENTS:
     - dataFlowAnalysis: Array of steps (step name, description, data types involved).
     - specificRisks: Array of risks unique to this tier + scenario combo.
-    - safetySettings: { available: boolean, configurations: [{ title: string, steps: string[] }] }.
+    - safetySettings: { available: boolean, configurations: [{ title: string, steps: string[] }] }. 
     - verdict: Summary, securityScore (0-100), and a clear recommendation.
-    - truthBomb: A brutally honest, creative, and "no-corporate-speak" warning about the hidden implications.
+    - truthBomb: A brutally honest, creative, and "no-corporate-speak" warning.
     
     You MUST return the output in valid JSON format only.
   `;
 
   const prompt = `
-    Perform a deep-dive security audit for:
+    Perform a high-accuracy security audit. Use Google Search to find the latest documentation.
     Tool: ${input.toolName}
     Website: ${input.website}
     License Tier: ${input.licenseTier}
     Specific Scenario: ${input.scenario}
+    
+    Focus especially on verifying if there are ACTUAL settings to opt-out of data training or to increase privacy for this specific scenario. If not found in documentation, mark as not available.
   `;
 
   const response = await ai.models.generateContent({
@@ -113,10 +119,9 @@ export async function performDeepDive(input: AnalysisInput): Promise<DeepDiveRes
     result = JSON.parse(text);
   } catch (e) {
     console.error("Failed to parse JSON", text);
-    throw new Error("Invalid response format from AI");
+    throw new Error("Invalid response format from AI. Please try again.");
   }
 
-  // Extract sources from grounding metadata
   const sources: { title: string; uri: string }[] = [];
   const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
   if (groundingChunks) {
@@ -135,6 +140,6 @@ export async function performDeepDive(input: AnalysisInput): Promise<DeepDiveRes
     toolName: input.toolName,
     licenseTier: input.licenseTier,
     scenario: input.scenario,
-    sources: sources.filter((v, i, a) => a.findIndex(t => t.uri === v.uri) === i) // Deduplicate
+    sources: sources.filter((v, i, a) => a.findIndex(t => t.uri === v.uri) === i)
   };
 }
