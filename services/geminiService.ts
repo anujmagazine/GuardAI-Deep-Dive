@@ -11,13 +11,13 @@ export async function performDeepDive(input: AnalysisInput): Promise<DeepDiveRes
     You are a world-class Corporate Security & Data Privacy Architect and Tech Researcher. 
     Your task is to conduct a "Deep Dive" audit into a specific software tool, focusing on a specific user scenario and license tier.
     
-    CRITICAL VERIFICATION INSTRUCTIONS:
+    CRITICAL VERIFICATION & SOURCE GROUNDING:
     1. Research the Tool: ${input.toolName} (${input.website}) using Google Search.
     2. Focus on Tier: ${input.licenseTier}. Privacy terms and UI options often differ significantly between Free and Enterprise.
     3. Analyze Scenario: ${input.scenario}. Map exactly how data moves, where it is stored, and who has access.
-    4. DATA SAFETY SETTINGS VERIFICATION (MANDATORY): 
+    4. SOURCE-BASED EVIDENCE: You MUST base your analysis on official documentation, privacy policies, and verified user manuals. DO NOT guess or hallucinate features.
+    5. DATA SAFETY SETTINGS VERIFICATION: 
        - You MUST search for the actual "Settings" or "Privacy" documentation of the tool.
-       - DO NOT invent UI paths. 
        - ONLY list settings that you can verify exist for the ${input.licenseTier} tier.
        - If no specific user-toggable data safety settings exist, set 'available' to false.
     
@@ -33,7 +33,7 @@ export async function performDeepDive(input: AnalysisInput): Promise<DeepDiveRes
   `;
 
   const prompt = `
-    Perform a high-accuracy security audit. Use Google Search to find the latest documentation.
+    Perform a high-accuracy security audit. You MUST identify the specific documents (Privacy Policy, Terms of Service, Help Center articles) that confirm your findings.
     Tool: ${input.toolName}
     Website: ${input.website}
     License Tier: ${input.licenseTier}
