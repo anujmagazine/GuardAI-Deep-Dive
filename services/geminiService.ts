@@ -17,12 +17,12 @@ export async function performDeepDive(input: AnalysisInput): Promise<DeepDiveRes
     3. Analyze Scenario: ${input.scenario}. Map exactly how data moves, where it is stored, and who has access.
     4. DATA SAFETY SETTINGS VERIFICATION (MANDATORY): 
        - You MUST search for the actual "Settings" or "Privacy" documentation of the tool.
-       - DO NOT invent UI paths (e.g., 'Settings > Privacy > Opt-out'). 
+       - DO NOT invent UI paths. 
        - ONLY list settings that you can verify exist for the ${input.licenseTier} tier.
-       - If no specific user-toggable data safety settings exist for this scenario/tier, you MUST set 'available' to false and return an empty array for configurations.
-       - If they do exist, provide the EXACT verified steps as per current documentation.
+       - If no specific user-toggable data safety settings exist, set 'available' to false.
     
     JSON STRUCTURE REQUIREMENTS:
+    - scenarioSummary: A concise (1-2 sentence) executive summary of the specific use case and software context being audited.
     - dataFlowAnalysis: Array of steps (step name, description, data types involved).
     - specificRisks: Array of risks unique to this tier + scenario combo.
     - safetySettings: { available: boolean, configurations: [{ title: string, steps: string[] }] }. 
@@ -38,8 +38,6 @@ export async function performDeepDive(input: AnalysisInput): Promise<DeepDiveRes
     Website: ${input.website}
     License Tier: ${input.licenseTier}
     Specific Scenario: ${input.scenario}
-    
-    Focus especially on verifying if there are ACTUAL settings to opt-out of data training or to increase privacy for this specific scenario. If not found in documentation, mark as not available.
   `;
 
   const response = await ai.models.generateContent({
@@ -51,6 +49,7 @@ export async function performDeepDive(input: AnalysisInput): Promise<DeepDiveRes
       responseSchema: {
         type: Type.OBJECT,
         properties: {
+          scenarioSummary: { type: Type.STRING },
           dataFlowAnalysis: {
             type: Type.ARRAY,
             items: {
@@ -105,7 +104,7 @@ export async function performDeepDive(input: AnalysisInput): Promise<DeepDiveRes
           },
           truthBomb: { type: Type.STRING }
         },
-        required: ["dataFlowAnalysis", "specificRisks", "safetySettings", "verdict", "truthBomb"]
+        required: ["scenarioSummary", "dataFlowAnalysis", "specificRisks", "safetySettings", "verdict", "truthBomb"]
       },
       tools: [{ googleSearch: {} }]
     }

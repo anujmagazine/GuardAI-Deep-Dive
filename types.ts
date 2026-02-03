@@ -27,6 +27,7 @@ export interface DeepDiveResult {
   toolName: string;
   licenseTier: LicenseTier;
   scenario: string;
+  scenarioSummary: string; // Brief executive summary of the analyzed scenario
   dataFlowAnalysis: DataFlowStep[];
   specificRisks: SpecificRisk[];
   safetySettings: {
